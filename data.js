@@ -142,8 +142,8 @@ const RADIO_DATA = {
             {
               "title": "栞 (Shiori)",
               "why": "봄과 이별의 이미지를 경쾌한 합주에 얹어 밴드의 서정성과 대중성을 함께 들려준다.",
-              "url": "https://www.youtube.com/watch?v=BYUQ4v1G8lk",
-              "youtubeId": "BYUQ4v1G8lk"
+              "url": "https://www.youtube.com/watch?v=j4XsCJHfplg",
+              "youtubeId": "j4XsCJHfplg"
             },
             {
               "title": "キケンナアソビ (Kikenna Asobi)",
@@ -1802,8 +1802,8 @@ const RADIO_DATA = {
             {
               "title": "Blue Rock Blue",
               "why": "대표곡으로 선정된 곡입니다.",
-              "url": "https://www.youtube.com/watch?v=BmjG-CC8KgM",
-              "youtubeId": "BmjG-CC8KgM"
+              "url": "https://www.youtube.com/watch?v=jzxJkfcYCDs",
+              "youtubeId": "jzxJkfcYCDs"
             },
             {
               "title": "Narcissus",
@@ -2200,8 +2200,8 @@ const RADIO_DATA = {
             {
               "title": "어쩌다 마주친 그대",
               "why": "구창모가 작사·작곡한 2집 수록곡이자 세대를 넘어 가장 널리 알려진 송골매의 대표곡이다.",
-              "url": "https://www.youtube.com/watch?v=IuQHG44ND2k",
-              "youtubeId": "IuQHG44ND2k"
+              "url": "https://www.youtube.com/watch?v=EN7O29X0nPw",
+              "youtubeId": "EN7O29X0nPw"
             },
             {
               "title": "모두 다 사랑하리",
