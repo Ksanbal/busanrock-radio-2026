@@ -1,0 +1,21 @@
+{
+  "name": "부국락 2026 라디오 가이드",
+  "short_name": "부국락 라디오",
+  "description": "부산국제록페스티벌 2026 출연진 99팀과 대표곡 297곡을 DJ 멘트와 함께 이어 듣는 비공식 라디오",
+  "lang": "ko-KR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#151515",
+  "theme_color": "#e9ff36",
+  "categories": ["music", "entertainment"],
+  "icons": [
+    {
+      "src": "./radio-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -4,7 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#f4ff43" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="부국락 라디오" />
   <title>부국락 2026 라디오 가이드</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./radio-icon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://www.youtube.com" />
   <link rel="preconnect" href="https://www.youtube-nocookie.com" />
   <link rel="stylesheet" href="./styles.css" />
@@ -26,9 +31,17 @@
         <button class="icon-button" id="nextButton" type="button" aria-label="다음">↷</button>
         <label class="toggle"><input id="narrationToggle" type="checkbox" checked><span>해설</span></label>
         <label class="toggle"><input id="songsToggle" type="checkbox" checked><span>노래</span></label>
+        <label class="toggle"><input id="keepAwakeToggle" type="checkbox"><span>화면 켜두기</span></label>
+        <button class="install-button" id="installButton" type="button" hidden>＋ 앱 설치</button>
       </div>
       <div class="status" id="statusText">날짜를 고르고 라디오를 시작하세요.</div>
     </section>
+
+    <aside class="background-note">
+      <strong>백그라운드 듣기</strong>
+      <span>홈 화면에 앱으로 설치하면 탭을 바꾼 뒤에도 재생을 유지하고, 지원 기기에서는 잠금화면 이전·다음 곡 제어를 사용할 수 있습니다.</span>
+      <small>단, iPhone 및 YouTube의 정책에 따라 화면 잠금 후 영상 재생이 중단될 수 있습니다. 이때는 ‘화면 켜두기’를 사용하세요.</small>
+    </aside>
 
     <section class="player-shell">
       <div class="now-playing">
@@ -37,7 +50,7 @@
         <h2 id="nowArtist">부산국제록페스티벌 2026</h2>
         <p id="nowTitle">재생 대기 중</p>
         <div class="progress"><div id="progressBar"></div></div>
-        <p class="story" id="nowStory">재생 버튼을 누르면 아티스트 소개와 공식 YouTube 영상을 번갈아 재생합니다.</p>
+        <p class="story" id="nowStory">DJ 소개와 곡 사이 멘트, 음악이 실제 라디오처럼 번갈아 이어집니다.</p>
         <a id="sourceLink" class="source-link" href="https://busanrockfestival.com/lineup/" target="_blank" rel="noopener">공식 라인업 ↗</a>
       </div>
       <div class="video-frame">
@@ -58,8 +71,8 @@
   </main>
 
   <footer>
-    <p>팬이 만든 비공식 가이드입니다. 음악은 내려받거나 재배포하지 않고 YouTube 공식 영상 임베드로 재생합니다.</p>
-    <p>영상이 임베드를 허용하지 않으면 원본 링크를 열거나 자동으로 다음 곡으로 넘어갑니다.</p>
+    <p>팬이 만든 비공식 가이드입니다. 음악은 내려받거나 재배포하지 않고 YouTube·SoundCloud의 공개 플레이어로 재생합니다.</p>
+    <p>영상 임베드 또는 모바일 백그라운드 재생 가능 여부는 플랫폼과 브라우저 정책에 따라 달라질 수 있습니다.</p>
   </footer>
 
   <script src="https://www.youtube.com/iframe_api"></script>
