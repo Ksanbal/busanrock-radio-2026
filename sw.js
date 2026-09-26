@@ -1,4 +1,4 @@
-const CACHE_NAME = 'busanrock-radio-v2';
+const CACHE_NAME = 'busanrock-radio-v3';
 const APP_SHELL = [
   './',
   './index.html',

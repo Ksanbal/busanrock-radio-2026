@@ -12,6 +12,8 @@ const state = {
   voice: null,
   pendingVideo: '',
   speechToken: 0,
+  utterance: null,
+  speechStartTimer: null,
   wakeLock: null,
   installPrompt: null,
 };
@@ -128,6 +130,9 @@ if ('speechSynthesis' in window) {
 function cancelSpeech() {
   state.speechToken += 1;
   state.narrating = false;
+  window.clearTimeout(state.speechStartTimer);
+  state.speechStartTimer = null;
+  state.utterance = null;
   window.speechSynthesis?.cancel();
 }
 
@@ -145,17 +150,31 @@ function speak(text, onEnd) {
   utterance.pitch = 1.03;
   utterance.volume = 1;
   utterance.voice = state.voice;
+  state.utterance = utterance;
   state.narrating = true;
   updateMediaSession({ narration: true, title: '부국락 라디오 멘트' });
 
+  let settled = false;
   const finish = () => {
-    if (token !== state.speechToken) return;
+    if (settled || token !== state.speechToken) return;
+    settled = true;
+    window.clearTimeout(state.speechStartTimer);
+    state.speechStartTimer = null;
+    state.utterance = null;
     state.narrating = false;
     if (state.playing) onEnd();
   };
   utterance.onend = finish;
   utterance.onerror = finish;
-  window.speechSynthesis.speak(utterance);
+  state.speechStartTimer = window.setTimeout(() => {
+    if (token !== state.speechToken) return;
+    const synthesis = window.speechSynthesis;
+    // YouTube and SoundCloud can leave the shared browser audio session paused
+    // when a track ends. Explicitly resume it before queueing the DJ narration.
+    synthesis.resume();
+    synthesis.speak(utterance);
+    if (!state.playing) synthesis.pause();
+  }, 120);
 }
 
 function pick(lines, salt = 0) {
@@ -291,12 +310,15 @@ function playCurrentSong() {
 }
 
 function handleSongEnded() {
-  if (!state.playing) return;
+  if (!state.playing || state.phase !== 'song') return;
   const artist = currentArtist();
   const previousSong = currentSong();
   if (!artist || !previousSong) return;
 
   state.phase = 'postSong';
+  // Release the embedded player's audio session before starting Web Speech.
+  // This also prevents duplicate ENDED/FINISH events from advancing twice.
+  stopEmbeddedMedia();
   if (state.songIndex < artist.songs.length - 1) {
     state.songIndex += 1;
     const nextSong = currentSong();
