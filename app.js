@@ -1,4 +1,4 @@
-/* global YT, SC, RADIO_DATA */
+/* global YT, SC, RADIO_DATA, NARRATION_AUDIO */
 
 const state = {
   day: '2026-10-02',
@@ -14,6 +14,8 @@ const state = {
   speechToken: 0,
   utterance: null,
   speechStartTimer: null,
+  narrationAudio: new Audio(),
+  narrationMode: null,
   wakeLock: null,
   installPrompt: null,
 };
@@ -130,10 +132,16 @@ if ('speechSynthesis' in window) {
 function cancelSpeech() {
   state.speechToken += 1;
   state.narrating = false;
+  state.narrationMode = null;
   window.clearTimeout(state.speechStartTimer);
   state.speechStartTimer = null;
   state.utterance = null;
   window.speechSynthesis?.cancel();
+  state.narrationAudio.pause();
+  state.narrationAudio.onended = null;
+  state.narrationAudio.onerror = null;
+  state.narrationAudio.removeAttribute('src');
+  state.narrationAudio.load();
 }
 
 function speak(text, onEnd) {
@@ -152,6 +160,7 @@ function speak(text, onEnd) {
   utterance.voice = state.voice;
   state.utterance = utterance;
   state.narrating = true;
+  state.narrationMode = 'speech';
   updateMediaSession({ narration: true, title: '부국락 라디오 멘트' });
 
   let settled = false;
@@ -162,6 +171,7 @@ function speak(text, onEnd) {
     state.speechStartTimer = null;
     state.utterance = null;
     state.narrating = false;
+    state.narrationMode = null;
     if (state.playing) onEnd();
   };
   utterance.onend = finish;
@@ -175,6 +185,56 @@ function speak(text, onEnd) {
     synthesis.speak(utterance);
     if (!state.playing) synthesis.pause();
   }, 120);
+}
+
+function narrate(key, text, onEnd) {
+  if (!$('#narrationToggle').checked) {
+    onEnd();
+    return;
+  }
+
+  const source = typeof NARRATION_AUDIO === 'undefined' ? '' : NARRATION_AUDIO[key];
+  if (!source) {
+    speak(text, onEnd);
+    return;
+  }
+
+  cancelSpeech();
+  const token = state.speechToken;
+  const audio = state.narrationAudio;
+  let settled = false;
+  state.narrating = true;
+  state.narrationMode = 'audio';
+  updateMediaSession({ narration: true, title: '부국락 라디오 멘트' });
+
+  const finish = () => {
+    if (settled || token !== state.speechToken) return;
+    settled = true;
+    audio.onended = null;
+    audio.onerror = null;
+    state.narrating = false;
+    state.narrationMode = null;
+    if (state.playing) onEnd();
+  };
+  const fallback = () => {
+    if (settled || token !== state.speechToken) return;
+    settled = true;
+    audio.onended = null;
+    audio.onerror = null;
+    state.narrating = false;
+    state.narrationMode = null;
+    speak(text, onEnd);
+  };
+
+  audio.preload = 'auto';
+  audio.src = source;
+  audio.onended = finish;
+  audio.onerror = fallback;
+  audio.play().catch(fallback);
+}
+
+function currentNarrationPrefix() {
+  return `${state.day}/artist-${String(state.artistIndex + 1).padStart(2, '0')}`;
 }
 
 function pick(lines, salt = 0) {
@@ -254,7 +314,7 @@ function beginDay() {
   const copy = dayOpeningText();
   updateNow('오늘의 오프닝', copy);
   setStatus(`${dayLabels[state.day]} 오프닝 방송 중`);
-  speak(copy, startArtist);
+  narrate(`${state.day}/day-opening`, copy, startArtist);
 }
 
 function startArtist() {
@@ -269,7 +329,7 @@ function startArtist() {
   const copy = artistIntroText(artist);
   updateNow('DJ 아티스트 소개', copy);
   setStatus(`${artist.artist} 소개 방송 중`);
-  speak(copy, announceFirstSong);
+  narrate(`${currentNarrationPrefix()}/intro`, copy, announceFirstSong);
 }
 
 function announceFirstSong() {
@@ -283,7 +343,7 @@ function announceFirstSong() {
   const copy = firstSongText(artist, song);
   updateNow(`다음 곡 · ${song.title}`, copy, song.url);
   setStatus(`${artist.artist} 첫 곡 소개 중`);
-  speak(copy, playCurrentSong);
+  narrate(`${currentNarrationPrefix()}/song-1-intro`, copy, playCurrentSong);
 }
 
 function playCurrentSong() {
@@ -325,12 +385,12 @@ function handleSongEnded() {
     const copy = betweenSongsText(artist, previousSong, nextSong, state.songIndex);
     updateNow(`DJ 브리지 · ${nextSong.title}`, copy, nextSong.url);
     setStatus(`${previousSong.title}에서 ${nextSong.title}(으)로 이어가는 중`);
-    speak(copy, playCurrentSong);
+    narrate(`${currentNarrationPrefix()}/song-${state.songIndex + 1}-bridge`, copy, playCurrentSong);
   } else {
     const copy = artistOutroText(artist, previousSong);
     updateNow('DJ 마무리 멘트', copy);
     setStatus(`${artist.artist} 코너 마무리 중`);
-    speak(copy, advanceArtist);
+    narrate(`${currentNarrationPrefix()}/outro`, copy, advanceArtist);
   }
 }
 
@@ -376,7 +436,13 @@ function pauseResume() {
     if (state.phase === 'idle' || state.phase === 'done') {
       beginDay();
     } else if (state.narrating) {
-      window.speechSynthesis?.resume();
+      if (state.narrationMode === 'audio') {
+        state.narrationAudio.play().catch(() => {
+          setStatus('해설 음원을 다시 재생할 수 없습니다. 다음 버튼으로 계속할 수 있습니다.');
+        });
+      } else {
+        window.speechSynthesis?.resume();
+      }
       setStatus('라디오 멘트를 계속합니다.');
     } else if (state.phase === 'song') {
       state.player?.playVideo();
@@ -391,6 +457,7 @@ function pauseResume() {
   state.playing = false;
   $('#playButton').textContent = '▶ 계속 듣기';
   window.speechSynthesis?.pause();
+  state.narrationAudio.pause();
   state.player?.pauseVideo();
   state.soundcloud?.pause();
   setPlaybackState('paused');

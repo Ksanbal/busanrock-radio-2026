@@ -1,10 +1,11 @@
-const CACHE_NAME = 'busanrock-radio-v3';
+const CACHE_NAME = 'busanrock-radio-v4';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './data.js',
+  './narration.js',
   './manifest.webmanifest',
   './radio-icon.svg',
 ];
@@ -24,6 +25,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return;
+  if (event.request.headers.has('range')) return;
   event.respondWith(
     fetch(event.request)
       .then((response) => {
